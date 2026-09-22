@@ -212,7 +212,7 @@ def event_approved_webhook(request):
         f"{settings.SUPABASE_URL}/rest/v1/source_content",
         headers={**headers, "Prefer": "return=representation"},
         json={
-            "source_type": "event_approval",
+            "source_type": "text",
             "source_reference": record.get("organization") or record.get("id"),
             "raw_text": raw_text,
             "processing_status": "pending",
