@@ -1,0 +1,13 @@
+name: Retry pending source content
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  interpret:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit /ingestion/interpret/
+        run: curl -sf --max-time 120 https://notified-backend-tsse.onrender.com/ingestion/interpret/

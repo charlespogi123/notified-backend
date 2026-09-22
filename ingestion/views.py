@@ -87,9 +87,17 @@ Raw post:
 
 def _interpret_row(row, model, headers):
     """Runs one source_content row through Gemini and writes the structured
-    result to the event/announcement table. `headers` must not include Prefer."""
+    result to the event/announcement table. `headers` must not include Prefer.
+
+    A row is only ever marked 'failed' when Gemini returned something we
+    couldn't parse (retrying the same input wouldn't help). Any failure to
+    even get a response — rate limits, timeouts, Gemini being down — leaves
+    the row 'pending' so the next /interpret/ run picks it back up."""
     prompt = PROMPT_TEMPLATE.format(raw_text=row["raw_text"])
-    gemini_response = model.generate_content(prompt)
+    try:
+        gemini_response = model.generate_content(prompt)
+    except Exception as e:
+        return {"source_content_id": row["source_content_id"], "error": str(e), "retryable": True}
 
     try:
         cleaned = gemini_response.text.strip().strip('```json').strip('```').strip()
