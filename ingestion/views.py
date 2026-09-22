@@ -132,13 +132,17 @@ def _interpret_row(row, model, headers):
         json=payload,
     )
 
+    insert_ok = insert_response.status_code in (200, 201)
     requests.patch(
         f"{settings.SUPABASE_URL}/rest/v1/source_content?source_content_id=eq.{row['source_content_id']}",
         headers=headers,
-        json={"processing_status": "processed"},
+        json={"processing_status": "processed" if insert_ok else "failed"},
     )
 
-    return {"source_content_id": row["source_content_id"], "table": table, "status": insert_response.status_code}
+    result = {"source_content_id": row["source_content_id"], "table": table, "status": insert_response.status_code}
+    if not insert_ok:
+        result["error"] = insert_response.text
+    return result
 
 
 def interpret_pending_content(request):
