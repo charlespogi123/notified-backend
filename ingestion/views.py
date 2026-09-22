@@ -69,6 +69,11 @@ class InterpretedPost(BaseModel):
 
 PROMPT_TEMPLATE = """You are extracting structured data from a raw campus post.
 Classify it as either "event" or "announcement", then extract fields.
+If the raw post below contains explicit labeled fields (e.g. "Title:",
+"Description:", "Organization:", "Venue:", "Date:", "Time:"), use each
+labeled value directly for the corresponding output field - do not merge,
+drop, or re-infer a labeled value. Only infer values from context when no
+explicit label is present for that field.
 Respond ONLY with valid JSON, no markdown, no explanation, matching this exact shape:
 {{
   "type": "event" or "announcement",
@@ -197,8 +202,8 @@ def event_approved_webhook(request):
         return JsonResponse({"skipped": "already approved, no status change"})
 
     raw_text = "\n".join(filter(None, [
-        record.get("title", ""),
-        record.get("description", ""),
+        record.get("title") and f"Title: {record['title']}",
+        record.get("description") and f"Description: {record['description']}",
         record.get("organization") and f"Organization: {record['organization']}",
         record.get("venue") and f"Venue: {record['venue']}",
         record.get("event_date") and f"Date: {record['event_date']}",
