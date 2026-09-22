@@ -63,6 +63,7 @@ class InterpretedPost(BaseModel):
     organization_name: Optional[str] = None
     event_date: Optional[str] = None
     start_time: Optional[str] = None
+    end_time: Optional[str] = None
     location: Optional[str] = None
     priority: Optional[str] = "medium"
 
@@ -82,6 +83,7 @@ Respond ONLY with valid JSON, no markdown, no explanation, matching this exact s
   "organization_name": "string or null",
   "event_date": "YYYY-MM-DD or null",
   "start_time": "HH:MM or null",
+  "end_time": "HH:MM or null",
   "location": "string or null",
   "priority": "low", "medium", or "high"
 }}
@@ -127,6 +129,7 @@ def _interpret_row(row, model, headers):
         payload["description"] = structured.description
         payload["event_date"] = structured.event_date
         payload["start_time"] = structured.start_time
+        payload["end_time"] = structured.end_time
         payload["location"] = structured.location
     else:
         payload["content"] = structured.description
